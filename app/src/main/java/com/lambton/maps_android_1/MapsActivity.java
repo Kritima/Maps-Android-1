@@ -84,7 +84,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
             }
         };
-        
+
         if (!hasLocationPermission()) {
             requestLocationPermission();
         } else {
@@ -92,7 +92,40 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
             LatLng canadaCenterLatLong = new LatLng( 43.651070,-79.347015);
             mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(canadaCenterLatLong, 5));
         }
-    }
+
+    mMap.setOnMarkerDragListener(new GoogleMap.OnMarkerDragListener() {
+        @Override
+        public void onMarkerDragStart(Marker marker) {
+
+        }
+
+        @Override
+        public void onMarkerDrag(Marker marker) {
+
+        }
+
+        @Override
+        public void onMarkerDragEnd(Marker marker) {
+
+            if (markersList.size() == POLYGON_SIDES) {
+                for(Polyline line: polylinesList){
+                    line.remove();
+                }
+                polylinesList.clear();
+
+                shape.remove();
+                shape = null;
+
+                for(Marker currMarker: distanceMarkers){
+                    currMarker.remove();
+                }
+                distanceMarkers.clear();
+                drawShape();
+            }
+        }
+    });
+}
+
 
     @Override
     public void onMapClick(LatLng latLng) {
