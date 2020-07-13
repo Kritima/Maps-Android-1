@@ -1,26 +1,32 @@
 package com.lambton.maps_android_1;
 
+import androidx.annotation.NonNull;
 import androidx.core.app.ActivityCompat;
 import androidx.fragment.app.FragmentActivity;
 
 import android.Manifest;
 import android.content.Context;
 import android.content.pm.PackageManager;
+import android.location.Address;
+import android.location.Geocoder;
 import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
 import android.os.Bundle;
+import android.text.TextUtils;
 
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
+import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.gms.maps.model.Polygon;
 import com.google.android.gms.maps.model.Polyline;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -144,6 +150,94 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
     private boolean hasLocationPermission() {
         return ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED;
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+
+        if (REQUEST_CODE == requestCode) {
+            if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
+                locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 5000, 0, locationListener);
+            }
+        }
+    }
+
+    private void setMarker(LatLng latLng){
+
+        Geocoder geoCoder = new Geocoder(this);
+        Address address = null;
+
+        try{
+            List<Address> matches = geoCoder.getFromLocation(latLng.latitude, latLng.longitude, 1);
+            address = (matches.isEmpty() ? null : matches.get(0));
+        }
+        catch (IOException e){
+            e.printStackTrace();
+        }
+
+        String title = "";
+        String snippet = "";
+
+        ArrayList<String> titleString = new ArrayList<>();
+        ArrayList<String> snippetString = new ArrayList<>();
+
+        if(address != null){
+            if(address.getSubThoroughfare() != null)
+            {
+                titleString.add(address.getSubThoroughfare());
+
+            }
+            if(address.getThoroughfare() != null)
+            {
+
+                titleString.add(address.getThoroughfare());
+
+            }
+            if(address.getPostalCode() != null)
+            {
+
+                titleString.add(address.getPostalCode());
+
+            }
+//            if(titleString.isEmpty())
+//            {
+//                titleString.add("Unknown Location");
+//            }
+            if(address.getLocality() != null)
+            {
+                snippetString.add(address.getLocality());
+
+            }
+            if(address.getAdminArea() != null)
+            {
+                snippetString.add(address.getAdminArea());
+            }
+
+        }
+
+        title = TextUtils.join(", ",titleString);
+        title = (title.equals("") ? "  " : title);
+
+        snippet = TextUtils.join(", ",snippetString);
+
+        MarkerOptions options = new MarkerOptions().position(latLng)
+                .draggable(true)
+                .title(title)
+                .icon(BitmapDescriptorFactory.fromResource(R.drawable.marker))
+                .snippet(snippet);
+
+        // check if there are already the same number of markers, we clear the map
+        if (markersList.size() == POLYGON_SIDES)
+        {
+            clearMap();
+        }
+
+        Marker mm = mMap.addMarker(options);
+        markersList.add(mm);
+
+        if (markersList.size() == POLYGON_SIDES) {
+            drawShape();
+        }
     }
 
 
