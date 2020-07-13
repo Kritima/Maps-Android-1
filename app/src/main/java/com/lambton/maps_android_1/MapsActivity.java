@@ -432,7 +432,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
     @Override
     public void onPolygonClick(Polygon polygon) {
-        
+
         LatLngBounds.Builder builder = LatLngBounds.builder();
         for(LatLng point: polygon.getPoints()){
             builder.include(point);
@@ -447,6 +447,16 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
     @Override
     public void onPolylineClick(Polyline polyline) {
+
+        List<LatLng> points = polyline.getPoints();
+        LatLng firstPoint = points.remove(0);
+        LatLng secondPoint = points.remove(0);
+
+        LatLng center = LatLngBounds.builder().include(firstPoint).include(secondPoint).build().getCenter();
+        MarkerOptions options = new MarkerOptions().position(center)
+                .draggable(true)
+                .icon(createPureTextIcon(getMarkerDistance(polyline)));
+        distanceMarkers.add(mMap.addMarker(options));
 
     }
 
