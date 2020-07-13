@@ -397,12 +397,11 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
             AlertDialog.Builder deleteDialog = new AlertDialog.Builder(this);
 
             deleteDialog
-                    .setTitle("Delete?")
-                    .setMessage("Would you like to delete the marker in red?")
+                    .setTitle("Remove?")
+                    .setMessage("Would you like to remove the marker?")
 
                     .setPositiveButton(android.R.string.yes, new DialogInterface.OnClickListener() {
                         public void onClick(DialogInterface dialog, int which) {
-                            // Continue with delete operation
                             finalNearestMarker.remove();
                             markersList.remove(finalNearestMarker);
 
