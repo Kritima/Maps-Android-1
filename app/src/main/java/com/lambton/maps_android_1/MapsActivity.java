@@ -32,6 +32,8 @@ import com.google.android.gms.maps.model.Polyline;
 import com.google.android.gms.maps.model.PolylineOptions;
 
 import java.io.IOException;
+import java.text.DecimalFormat;
+import java.text.NumberFormat;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Vector;
@@ -458,4 +460,15 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         return (rad * 180.0 / Math.PI);
     }
 
+    public String getMarkerDistance(Polyline polyline){
+        List<LatLng> points = polyline.getPoints();
+        LatLng firstPoint = points.remove(0);
+        LatLng secondPoint = points.remove(0);
+
+
+        double distance = distance(firstPoint.latitude,firstPoint.longitude,
+                secondPoint.latitude,secondPoint.longitude);
+        NumberFormat formatter = new DecimalFormat("#0.0");
+        return formatter.format(distance) + " KM";
+    }
 }
