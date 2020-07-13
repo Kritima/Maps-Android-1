@@ -24,6 +24,7 @@ import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.LatLngBounds;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.gms.maps.model.Polygon;
@@ -431,6 +432,16 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
     @Override
     public void onPolygonClick(Polygon polygon) {
+        
+        LatLngBounds.Builder builder = LatLngBounds.builder();
+        for(LatLng point: polygon.getPoints()){
+            builder.include(point);
+        }
+        LatLng center = builder.build().getCenter();
+        MarkerOptions options = new MarkerOptions().position(center)
+                .draggable(true)
+                .icon(createPureTextIcon(getTotalDistance(polylinesList)));
+        distanceMarkers.add(mMap.addMarker(options));
 
     }
 
