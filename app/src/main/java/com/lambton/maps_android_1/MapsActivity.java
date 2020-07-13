@@ -246,7 +246,6 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                 .icon(BitmapDescriptorFactory.fromResource(R.drawable.marker))
                 .snippet(snippet);
 
-        // check if there are already the same number of markers, we clear the map
         if (markersList.size() == POLYGON_SIDES)
         {
             clearMap();
@@ -313,7 +312,6 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         }
         System.out.println(sortedLatLong);
 
-        // add polygon as per convex hull lat long
         options.addAll(sortedLatLong);
         shape = mMap.addPolygon(options);
         shape.setClickable(true);
@@ -326,7 +324,6 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
             index++;
             if (index == sortedLatLong.size()) {
-                // at last add initial point
                 polyLinePoints[index] = sortedLatLong.elementAt(0);
             }
         }
@@ -395,7 +392,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         }
 
         if(nearestMarker != null) {
-            nearestMarker.setIcon(BitmapDescriptorFactory.fromResource(R.drawable.marker_selected));
+            nearestMarker.setIcon(BitmapDescriptorFactory.fromResource(R.drawable.marker));
             final Marker finalNearestMarker = nearestMarker;
             AlertDialog.Builder deleteDialog = new AlertDialog.Builder(this);
 
@@ -403,8 +400,6 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                     .setTitle("Delete?")
                     .setMessage("Would you like to delete the marker in red?")
 
-                    // Specifying a listener allows you to take an action before dismissing the dialog.
-                    // The dialog is automatically dismissed when a dialog button is clicked.
                     .setPositiveButton(android.R.string.yes, new DialogInterface.OnClickListener() {
                         public void onClick(DialogInterface dialog, int which) {
                             // Continue with delete operation
