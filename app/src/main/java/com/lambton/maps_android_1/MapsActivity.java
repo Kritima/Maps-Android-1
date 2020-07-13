@@ -1,11 +1,13 @@
 package com.lambton.maps_android_1;
 
 import androidx.annotation.NonNull;
+import androidx.appcompat.app.AlertDialog;
 import androidx.core.app.ActivityCompat;
 import androidx.fragment.app.FragmentActivity;
 
 import android.Manifest;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.pm.PackageManager;
 import android.graphics.Color;
 import android.location.Address;
@@ -359,7 +361,69 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     @Override
     public void onMapLongClick(LatLng latLng) {
 
-    }
+        if(markersList.size() == 0){
+            return;
+        }
+        double minDistance = Double.MAX_VALUE;
+        Marker nearestMarker = null;
+
+        for(Marker marker: markersList){
+            double currDistance = distance(marker.getPosition().latitude,
+                    marker.getPosition().longitude,
+                    latLng.latitude,
+                    latLng.longitude);
+            if(currDistance < minDistance){
+                minDistance = currDistance;
+                nearestMarker = marker;
+            }
+        }
+
+        if(nearestMarker != null) {
+            nearestMarker.setIcon(BitmapDescriptorFactory.fromResource(R.drawable.marker_selected));
+            final Marker finalNearestMarker = nearestMarker;
+            AlertDialog.Builder deleteDialog = new AlertDialog.Builder(this);
+
+            deleteDialog
+                    .setTitle("Delete?")
+                    .setMessage("Would you like to delete the marker in red?")
+
+                    // Specifying a listener allows you to take an action before dismissing the dialog.
+                    // The dialog is automatically dismissed when a dialog button is clicked.
+                    .setPositiveButton(android.R.string.yes, new DialogInterface.OnClickListener() {
+                        public void onClick(DialogInterface dialog, int which) {
+                            // Continue with delete operation
+                            finalNearestMarker.remove();
+                            markersList.remove(finalNearestMarker);
+
+                            for (Polyline polyline : polylinesList) {
+                                polyline.remove();
+                            }
+                            polylinesList.clear();
+
+                            if (shape != null) {
+                                shape.remove();
+                                shape = null;
+                            }
+
+                            for (Marker currMarker : distanceMarkers) {
+                                currMarker.remove();
+                            }
+                            distanceMarkers.clear();
+
+                        }
+                    })
+                    .setNegativeButton(android.R.string.no, new DialogInterface.OnClickListener() {
+                        public void onClick(DialogInterface dialog, int which) {
+                            finalNearestMarker.setIcon(BitmapDescriptorFactory.fromResource(R.drawable.marker));
+
+                        }
+                    });
+
+            AlertDialog dialog = deleteDialog.create();
+            dialog.show();
+        }
+
+        }
 
     @Override
     public void onPolygonClick(Polygon polygon) {
