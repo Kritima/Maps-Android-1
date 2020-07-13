@@ -7,6 +7,7 @@ import androidx.fragment.app.FragmentActivity;
 import android.Manifest;
 import android.content.Context;
 import android.content.pm.PackageManager;
+import android.graphics.Color;
 import android.location.Address;
 import android.location.Geocoder;
 import android.location.Location;
@@ -24,11 +25,14 @@ import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.gms.maps.model.Polygon;
+import com.google.android.gms.maps.model.PolygonOptions;
 import com.google.android.gms.maps.model.Polyline;
+import com.google.android.gms.maps.model.PolylineOptions;
 
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Vector;
 
 public class MapsActivity extends FragmentActivity implements OnMapReadyCallback,  GoogleMap.OnMapClickListener, GoogleMap.OnMapLongClickListener, GoogleMap.OnPolylineClickListener, GoogleMap.OnPolygonClickListener {
 
@@ -238,6 +242,91 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         if (markersList.size() == POLYGON_SIDES) {
             drawShape();
         }
+    }
+
+    private void drawShape (){
+        PolygonOptions options = new PolygonOptions()
+                .fillColor(Color.argb(75, 0, 255, 0))
+                .strokeWidth(0);
+
+        LatLng[] markersConvex = new LatLng[POLYGON_SIDES];
+        for (int i = 0; i < POLYGON_SIDES; i++) {
+            markersConvex[i] = new LatLng(markersList.get(i).getPosition().latitude,
+                    markersList.get(i).getPosition().longitude);
+        }
+
+
+        Vector<LatLng> sortedLatLong = PointPlotter.convexHull(markersConvex, POLYGON_SIDES);
+
+        // get sortedLatLong
+        Vector<LatLng> sortedLatLong2 =  new Vector<>();
+
+        // leftmost marker
+        int l = 0;
+        for (int i = 0; i < markersList.size(); i++)
+            if (markersList.get(i).getPosition().latitude < markersList.get(l).getPosition().latitude)
+                l = i;
+
+        Marker currentMarker = markersList.get(l);
+        sortedLatLong2.add(currentMarker.getPosition());
+        System.out.println(currentMarker.getPosition());
+        while(sortedLatLong2.size() != POLYGON_SIDES){
+            double minDistance = Double.MAX_VALUE;
+            Marker nearestMarker  = null;
+            for(Marker marker: markersList){
+                if(sortedLatLong2.contains(marker.getPosition())){
+                    continue;
+                }
+
+
+                double curDistance = distance(currentMarker.getPosition().latitude,
+                        currentMarker.getPosition().longitude,
+                        marker.getPosition().latitude,
+                        marker.getPosition().longitude);
+
+                if(curDistance < minDistance){
+                    minDistance = curDistance;
+                    nearestMarker = marker;
+                }
+
+            }
+            if(nearestMarker != null){
+                sortedLatLong2.add(nearestMarker.getPosition());
+                currentMarker = nearestMarker;
+            }
+        }
+        System.out.println(sortedLatLong);
+
+        // add polygon as per convex hull lat long
+        options.addAll(sortedLatLong);
+        shape = mMap.addPolygon(options);
+        shape.setClickable(true);
+
+        // draw the polyline too
+        LatLng[] polyLinePoints = new LatLng[sortedLatLong.size() + 1];
+        int index = 0;
+        for (LatLng x : sortedLatLong) {
+            polyLinePoints[index] = x;
+
+            index++;
+            if (index == sortedLatLong.size()) {
+                // at last add initial point
+                polyLinePoints[index] = sortedLatLong.elementAt(0);
+            }
+        }
+
+        for(int i =0 ; i<polyLinePoints.length -1 ; i++){
+
+            LatLng[] tempArr = {polyLinePoints[i], polyLinePoints[i+1] };
+            Polyline currentPolyline =  mMap.addPolyline(new PolylineOptions()
+                    .clickable(true)
+                    .add(tempArr)
+                    .color(Color.RED));
+            currentPolyline.setClickable(true);
+            polylinesList.add(currentPolyline);
+        }
+
+
     }
 
 
