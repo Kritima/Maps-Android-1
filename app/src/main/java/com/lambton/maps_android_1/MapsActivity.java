@@ -355,6 +355,8 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
     @Override
     public void onMapClick(LatLng latLng) {
+        System.out.println("long press");
+        setMarker(latLng);
 
     }
 
