@@ -352,7 +352,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     }
 
     private void clearMap() {
-        
+
         for (Marker marker : markersList) {
             marker.remove();
         }
