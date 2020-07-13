@@ -329,6 +329,27 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
     }
 
+    private void clearMap() {
+        for (Marker marker : markersList) {
+            marker.remove();
+        }
+        markersList.clear();
+
+        for(Polyline line: polylinesList){
+            line.remove();
+        }
+        polylinesList.clear();
+
+        shape.remove();
+        shape = null;
+
+        for (Marker marker : distanceMarkers) {
+            marker.remove();
+        }
+        distanceMarkers.clear();
+
+    }
+
 
     @Override
     public void onMapClick(LatLng latLng) {
