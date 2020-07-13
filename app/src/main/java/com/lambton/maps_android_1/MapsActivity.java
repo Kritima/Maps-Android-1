@@ -2,6 +2,8 @@ package com.lambton.maps_android_1;
 
 import androidx.fragment.app.FragmentActivity;
 
+import android.location.LocationListener;
+import android.location.LocationManager;
 import android.os.Bundle;
 
 import com.google.android.gms.maps.CameraUpdateFactory;
@@ -9,12 +11,25 @@ import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.gms.maps.model.Polygon;
 import com.google.android.gms.maps.model.Polyline;
 
+import java.util.ArrayList;
+import java.util.List;
+
 public class MapsActivity extends FragmentActivity implements OnMapReadyCallback,  GoogleMap.OnMapClickListener, GoogleMap.OnMapLongClickListener, GoogleMap.OnPolylineClickListener, GoogleMap.OnPolygonClickListener {
 
+    private static final int REQUEST_CODE = 1;
+    private static final int POLYGON_SIDES = 4;
+    Polyline line;
+    Polygon shape;
+    List<Marker> markersList = new ArrayList<>();
+    List<Marker> distanceMarkers = new ArrayList<>();
+    ArrayList<Polyline> polylinesList = new ArrayList<>();
+    LocationManager locationManager;
+    LocationListener locationListener;
     private GoogleMap mMap;
 
     @Override
@@ -48,7 +63,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
     @Override
     public void onMapClick(LatLng latLng) {
-        
+
     }
 
     @Override
