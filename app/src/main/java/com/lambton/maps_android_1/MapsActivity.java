@@ -40,6 +40,7 @@ import java.io.IOException;
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Vector;
 
@@ -47,11 +48,13 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
     private static final int REQUEST_CODE = 1;
     private static final int POLYGON_SIDES = 4;
-    Polyline line;
     Polygon shape;
     List<Marker> markersList = new ArrayList<>();
     List<Marker> distanceMarkers = new ArrayList<>();
+    ArrayList<Character> letterList = new ArrayList<>();
     ArrayList<Polyline> polylinesList = new ArrayList<>();
+    List<Marker> cityMarkers = new ArrayList<>();
+    HashMap<LatLng, Character> markerLabelMap = new HashMap<>();
     LocationManager locationManager;
     LocationListener locationListener;
     private GoogleMap mMap;
@@ -190,78 +193,86 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
         Geocoder geoCoder = new Geocoder(this);
         Address address = null;
-
-        try{
+        try
+        {
             List<Address> matches = geoCoder.getFromLocation(latLng.latitude, latLng.longitude, 1);
             address = (matches.isEmpty() ? null : matches.get(0));
         }
-        catch (IOException e){
+        catch (IOException e)
+        {
             e.printStackTrace();
         }
-
         String title = "";
         String snippet = "";
-
         ArrayList<String> titleString = new ArrayList<>();
         ArrayList<String> snippetString = new ArrayList<>();
-
         if(address != null){
             if(address.getSubThoroughfare() != null)
             {
                 titleString.add(address.getSubThoroughfare());
-
             }
             if(address.getThoroughfare() != null)
             {
-
                 titleString.add(address.getThoroughfare());
-
             }
             if(address.getPostalCode() != null)
             {
-
                 titleString.add(address.getPostalCode());
-
+            }
+            if(titleString.isEmpty())
+            {
+                titleString.add("Unknown Location");
             }
             if(address.getLocality() != null)
             {
                 snippetString.add(address.getLocality());
-
             }
             if(address.getAdminArea() != null)
             {
                 snippetString.add(address.getAdminArea());
             }
-
         }
-
         title = TextUtils.join(", ",titleString);
         title = (title.equals("") ? "  " : title);
-
         snippet = TextUtils.join(", ",snippetString);
-
         MarkerOptions options = new MarkerOptions().position(latLng)
                 .draggable(true)
                 .title(title)
                 .icon(BitmapDescriptorFactory.fromResource(R.drawable.marker))
                 .snippet(snippet);
-
         if (markersList.size() == POLYGON_SIDES)
         {
             clearMap();
         }
-
         Marker mm = mMap.addMarker(options);
         markersList.add(mm);
-
         if (markersList.size() == POLYGON_SIDES) {
             drawShape();
         }
+        
+        Character cityLetters = 'A';
+        Character[] arr = {'A','B','C','D'};
+        for(Character letter: arr){
+            if(letterList.contains(letter)){
+                continue;
+            }
+            cityLetters = letter;
+            break;
+        }
+        LatLng labelLatLng = new LatLng(latLng.latitude - 0.55,latLng.longitude);
+        MarkerOptions optionsCityLabel = new MarkerOptions().position(labelLatLng)
+                .draggable(false)
+                .icon(createPureTextIcon(cityLetters.toString()))
+                .snippet(snippet);
+        Marker letterMarker = mMap.addMarker(optionsCityLabel);
+        cityMarkers.add(letterMarker);
+        letterList.add(cityLetters);
+        markerLabelMap.put(letterMarker.getPosition(),cityLetters);
     }
 
     private void drawShape (){
         PolygonOptions options = new PolygonOptions()
-                .fillColor(Color.argb(75, 0, 255, 0))
+                .fillColor(Color.argb(35, 0, 255, 0))
                 .strokeWidth(0);
 
         LatLng[] markersConvex = new LatLng[POLYGON_SIDES];
@@ -273,10 +284,8 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
         Vector<LatLng> sortedLatLong = CrossingPoint.convexHull(markersConvex, POLYGON_SIDES);
 
-        // get sortedLatLong
         Vector<LatLng> sortedLatLong2 =  new Vector<>();
 
-        // leftmost marker
         int l = 0;
         for (int i = 0; i < markersList.size(); i++)
             if (markersList.get(i).getPosition().latitude < markersList.get(l).getPosition().latitude)
@@ -316,7 +325,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         shape = mMap.addPolygon(options);
         shape.setClickable(true);
 
-        // draw the polyline too
+
         LatLng[] polyLinePoints = new LatLng[sortedLatLong.size() + 1];
         int index = 0;
         for (LatLng x : sortedLatLong) {
@@ -366,7 +375,6 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
     @Override
     public void onMapClick(LatLng latLng) {
-        System.out.println("long press");
         setMarker(latLng);
 
     }
