@@ -471,4 +471,23 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         NumberFormat formatter = new DecimalFormat("#0.0");
         return formatter.format(distance) + " KM";
     }
+
+    public String getTotalDistance(ArrayList<Polyline> polylines){
+
+        double totalDistance = 0;
+        for(Polyline polyline : polylines){
+            List<LatLng> points = polyline.getPoints();
+            LatLng firstPoint = points.remove(0);
+            LatLng secondPoint = points.remove(0);
+
+
+            double distance = distance(firstPoint.latitude,firstPoint.longitude,
+                    secondPoint.latitude,secondPoint.longitude);
+            totalDistance += distance;
+
+        }
+        NumberFormat formatter = new DecimalFormat("#0.0");
+
+        return formatter.format(totalDistance) + " KM";
+    }
 }
